@@ -1,58 +1,56 @@
 import pandas as pd
 import numpy as np
-
-def process_marketing_data(file_path):
-    # 1. Load Data: Handles both CSV and Excel
-    if file_path.endswith('.csv'):
-        df = pd.read_csv(file_path)
-    else:
-        df = pd.read_excel(file_path)
-
-    # 2. Functional Cleaning: Method to strip symbols and handle NaNs
-    def clean_financials(col):
-        return pd.to_numeric(col.replace('[\$,]', '', regex=True))
-
-    # Identify financial columns dynamically (adjust these names to match your file)
-    financial_cols = ['Spend', 'Revenue', 'Budget'] 
-    for col in [c for c in financial_cols if c in df.columns]:
-        df[col] = clean_financials(df[col])
-
-    # 3. Business Logic: Methods for KPI calculation
-    df['ROI_pct'] = ((df['Revenue'] - df['Spend']) / df['Spend'] * 100).replace([np.inf, -np.inf], 0).fillna(0)
-    
-    # 4. Insight Generation: Aggregation Methods
-    summary = df.groupby('Campaign').agg({
-        'Spend': 'sum',
-        'Revenue': 'sum',
-        'ROI_pct': 'mean'
-    }).sort_values(by='ROI_pct', ascending=False)
-
-    return df, summary
-
 import matplotlib.pyplot as plt
 import seaborn as sns
 
-# 1. Select the behavioral columns for analysis
-behavioral_cols = ['monthly_spend', 'social_media_usage', 'tech_savvy', 
-                  'brand_loyalty', 'impulse_buying', 'return_frequency']
+# 1. Define the Processing Function
+def process_marketing_data(file_path):
+    # Load the data
+    df = pd.read_csv(file_path)
+    
+    # Clean column names (removes hidden spaces)
+    df.columns = df.columns.str.strip()
 
-# 2. Calculate the correlation matrix
-# Correlation tells us how much one variable changes in relation to another
-corr_matrix = df[behavioral_cols].corr()
+    # Functional Cleaning: Method to strip symbols from financial columns
+    def clean_financials(value):
+        if isinstance(value, str):
+            return float(value.replace('$', '').replace(',', ''))
+        return value
 
-# 3. Create the Heatmap
-plt.figure(figsize=(10, 8))
-sns.heatmap(corr_matrix, annot=True, cmap='RdYlGn', center=0, fmt='.2f')
+    # Apply cleaning to your specific spend column
+    if 'monthly_spend' in df.columns:
+        df['monthly_spend'] = df['monthly_spend'].apply(clean_financials)
 
-# Adding professional titles for your portfolio
-plt.title('Consumer Behavior Correlation Matrix', fontsize=16, pad=20)
-plt.tight_layout()
+    return df
 
-# Save the plot to include in your GitHub README
-plt.savefig('behavior_heatmap.png')
-plt.show()
+# 2. Set the File Path
+file_to_open = "Consumer_Shopping_Trends_2026 (6).csv"
 
+# 3. Run the Process
+try:
+    df = process_marketing_data(file_to_open)
+    print("Data loaded successfully!")
+    print(df.head())
 
-# Usage
-# df_detailed, business_summary = process_marketing_data('your_uploaded_file.csv')
-# print(business_summary)
+    # 4. Behavioral Analysis (Correlation)
+    behavioral_cols = ['monthly_spend', 'social_media_usage', 'tech_savvy', 
+                      'brand_loyalty', 'impulse_buying', 'return_frequency']
+
+    # Filter only columns that exist in the file to avoid errors
+    existing_cols = [c for c in behavioral_cols if c in df.columns]
+    corr_matrix = df[existing_cols].corr()
+
+    # 5. Create and Save the Heatmap
+    plt.figure(figsize=(10, 8))
+    sns.heatmap(corr_matrix, annot=True, cmap='RdYlGn', center=0, fmt='.2f')
+    plt.title('Consumer Behavior Correlation Matrix', fontsize=16, pad=20)
+    plt.tight_layout()
+    
+    plt.savefig('behavior_heatmap.png')
+    print("Heatmap saved as 'behavior_heatmap.png'")
+    plt.show()
+
+except FileNotFoundError:
+    print(f"Error: The file '{file_to_open}' was not found. Please check the filename.")
+except Exception as e:
+    print(f"An error occurred: {e}")
