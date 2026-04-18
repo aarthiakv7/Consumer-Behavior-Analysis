@@ -33,8 +33,8 @@ try:
     print(df.head())
 
     # 4. Behavioral Analysis (Correlation)
-    behavioral_cols = ['monthly_spend', 'social_media_usage', 'tech_savvy', 
-                      'brand_loyalty', 'impulse_buying', 'return_frequency','need_touch_feel_score','product_availability_online']
+    behavioral_cols = ['monthly_income', 'social_media_hours', 'tech_savvy_score', 
+                      'brand_loyalty_score', 'impulse_buying_score', 'return_frequency','need_touch_feel_score','product_availability_online']
 
     # Filter only columns that exist in the file to avoid errors
     existing_cols = [c for c in behavioral_cols if c in df.columns]
