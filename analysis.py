@@ -29,6 +29,30 @@ def process_marketing_data(file_path):
 
     return df, summary
 
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# 1. Select the behavioral columns for analysis
+behavioral_cols = ['monthly_spend', 'social_media_usage', 'tech_savvy', 
+                  'brand_loyalty', 'impulse_buying', 'return_frequency']
+
+# 2. Calculate the correlation matrix
+# Correlation tells us how much one variable changes in relation to another
+corr_matrix = df[behavioral_cols].corr()
+
+# 3. Create the Heatmap
+plt.figure(figsize=(10, 8))
+sns.heatmap(corr_matrix, annot=True, cmap='RdYlGn', center=0, fmt='.2f')
+
+# Adding professional titles for your portfolio
+plt.title('Consumer Behavior Correlation Matrix', fontsize=16, pad=20)
+plt.tight_layout()
+
+# Save the plot to include in your GitHub README
+plt.savefig('behavior_heatmap.png')
+plt.show()
+
+
 # Usage
 # df_detailed, business_summary = process_marketing_data('your_uploaded_file.csv')
 # print(business_summary)
